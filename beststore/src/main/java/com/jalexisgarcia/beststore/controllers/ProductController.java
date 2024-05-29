@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -120,6 +121,39 @@ public class ProductController {
             if (result.hasErrors()) {
                 return "products/EditProduct";
             }
+
+            if (!productDto.getImageFile().isEmpty()) {
+                //delete old image
+                String uploadDir = "public/images/";
+                Path oldImagePath = Paths.get(uploadDir + product.getImageFileName());
+
+                try {
+                    Files.delete(oldImagePath);
+                } catch (Exception ex) {
+                    System.out.println("Exception: " + ex.getMessage());
+                }
+
+                //save new image
+                MultipartFile image = productDto.getImageFile();
+                Date createdAt = new Date();
+                String storageFileName = createdAt.getTime() + "_" + image.getOriginalFilename();
+                try (InputStream inputStream = image.getInputStream()) {
+                    Files.copy(inputStream, Paths.get(uploadDir + storageFileName),
+                    StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                product.setImageFileName(storageFileName);
+            }
+
+            product.setName(productDto.getName());
+            product.setBrand(productDto.getBrand());
+            product.setCategory(productDto.getCategory());
+            product.setPrice(productDto.getPrice());
+            product.setDescription(productDto.getDescription());
+
+            iProductRepository.save(product);
+
+
         } catch (Exception ex) {
             System.out.println("Exception: " +ex.getMessage());
         }
