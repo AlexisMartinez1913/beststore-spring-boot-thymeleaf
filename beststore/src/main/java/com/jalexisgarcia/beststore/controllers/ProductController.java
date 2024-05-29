@@ -10,10 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -22,10 +19,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static java.nio.file.Files.*;
 
 @Controller
+@CrossOrigin("*")
 @RequestMapping("/products")
 public class ProductController {
     @Autowired
@@ -83,8 +82,47 @@ public class ProductController {
         product.setCreateAt(createAt);
         product.setImageFileName(storageFileName);
         iProductRepository.save(product);
-        
+
         return "redirect:/products";
 
+    }
+    @GetMapping("/edit")
+    public String showEditPage(Model model, @RequestParam int id) {
+        try {
+            Optional<Product> optionalProduct = iProductRepository.findById(id);
+            if (optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                ProductDto productDto = new ProductDto();
+                productDto.setName(product.getName());
+                productDto.setBrand(product.getBrand());
+                productDto.setCategory(product.getCategory());
+                productDto.setPrice(product.getPrice());
+                productDto.setDescription(product.getDescription());
+
+                model.addAttribute("product", product);
+                model.addAttribute("productDto", productDto);
+            } else {
+                return "redirect:/products";
+            }
+        } catch (Exception ex) {
+            System.out.println("Exception: " + ex.getMessage());
+            return "redirect:/products";
+        }
+        return "products/EditProduct";
+    }
+
+    @PostMapping("/edit")
+    public String updateProduct(Model model, @RequestParam int id, @Valid @ModelAttribute ProductDto productDto,
+                                BindingResult result) {
+        try {
+            Product product = iProductRepository.findById(id).get();
+            model.addAttribute("product", product);
+            if (result.hasErrors()) {
+                return "products/EditProduct";
+            }
+        } catch (Exception ex) {
+            System.out.println("Exception: " +ex.getMessage());
+        }
+        return "redirect:/products";
     }
 }
