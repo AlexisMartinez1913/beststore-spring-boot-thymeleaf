@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/beststore.iml" filepath="$PROJECT_DIR$/.idea/beststore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/beststore/beststore.iml" filepath="$PROJECT_DIR$/beststore/beststore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/beststore-spring-boot-thymeleaf.iml" filepath="$PROJECT_DIR$/.idea/beststore-spring-boot-thymeleaf.iml" />
     </modules>
   </component>
 </project>
